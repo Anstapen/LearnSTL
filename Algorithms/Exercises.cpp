@@ -165,6 +165,12 @@ namespace ContainerAlgorithm {
 		std::vector<int> v2{ 10,11,12,13,14,15,16,17,18,19 };
 
 		//Implementation here
+		
+		// the suboptimal version
+		// std::copy(v1.begin(), v1.end(), std::back_inserter(v2));
+
+		// this is the fastest way (I think)
+		v2.insert(v2.end(), v1.begin(), v1.end());
 
 		Print(v2);
 	}
@@ -178,6 +184,7 @@ namespace ContainerAlgorithm {
 		std::vector<int> v2{ 10,11,12,13,14,15,16,17,18,19 };
 
 		//Implementation here
+		std::copy_if(v1.begin(), v1.end(), std::back_inserter(v2), [](int x) {return x > 5;  });
 
 		Print(v2);
 	}
@@ -206,6 +213,7 @@ namespace ContainerAlgorithm {
 		std::vector<int> v2{ 10,11,12,13,14,15,16,17,18,19 };
 
 		//Implementation here
+		std::reverse_copy(v1.begin(), v1.end(), std::back_inserter(v2));
 
 		Print(v1);
 		Print(v2);
@@ -218,6 +226,14 @@ namespace ContainerAlgorithm {
 
 		ExerciseStart t{ "ContainerAlgorithm:Exercise 5" };
 		std::vector<int> v1{ 1,2,3,4,5,6,7,8,9 };
+
+
+		// in separate lines
+		// std::vector<int>::iterator pos3 = v1.begin() + 3;
+		// std::copy_n(v1.begin(), 5, pos3);
+
+		// al in one line
+		std::copy_n(v1.begin(), 5, ((std::vector<int>::iterator)v1.begin() + 3));
 
 		//Implementation here
 
@@ -232,6 +248,15 @@ namespace ContainerAlgorithm {
 
 		//Implementation here
 
+		// What comes in mind first (probably slow and too complex)
+		/*for (auto i = v1.begin(); i < v1.end(); i++)
+		{
+			*i += 1;
+		}*/
+
+		// Maybe transform?
+		std::transform(v1.begin(), v1.end(), v1.begin(), [](int x) {return ++x; });
+
 		Print(v1);
 	}
 
@@ -242,6 +267,8 @@ namespace ContainerAlgorithm {
 		std::vector<int> v1{ 1,2,3,4,5,6,7,8,9 };
 
 		//Implementation here
+		unsigned int num = std::count_if(v1.begin(), v1.end(), [](int x) { return x % 2 == 0; });
+		Print(num);
 	}
 
 	void Exercise8()
@@ -254,6 +281,23 @@ namespace ContainerAlgorithm {
 		//Implementation here
 		std::vector<int> v3;
 
+
+		// most complex and hard to read
+		/*
+		for (auto i = v1.begin(); i < v1.end(); i++)
+		{
+			// Check if the current element exists in v2
+			auto exists = std::find(v2.begin(), v2.end(), *i);
+			if (exists == v2.end())
+			{
+				// The element was found
+				v3.push_back(*i);
+			}
+		}
+		*/
+		// Better but not the best i guess (is there a dedicated function for stuff like this?)
+		std::copy_if(v1.begin(), v1.end(), std::back_inserter(v3), [&v2](int x) { return std::find(v2.begin(), v2.end(), x) == v2.end(); });
+
 		Print(v3);
 	}
 
@@ -264,7 +308,26 @@ namespace ContainerAlgorithm {
 
 		//Implementation here
 
-		//Print(v);
+
+		// wihtout STL
+		/*
+		std::vector<int> v;
+		for (int i = 10; i <= 100; i++)
+		{
+			v.push_back(i);
+		}*/
+
+		// with STL but complex
+		/*
+		std::vector<int> v(91);
+		std::generate(v.begin(), v.end(), [n = 10] ()  mutable { return n++; });
+		*/
+
+		// Easiest way imo
+		std::vector<int> v(91);
+		std::iota(v.begin(), v.end(), 10);
+
+		Print(v);
 	}
 
 	void Exercise10()
