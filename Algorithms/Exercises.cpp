@@ -637,12 +637,16 @@ namespace Misc {
 		/* Check the value at this position */
 		const ValueType& current_element = *middle_it;
 
+
+		/* Search in one of the two parts of the collection */
 		if (current_element >= value)
 		{
+			/* Continue search in the part that is <= value */
 			return BinarySearch(first, middle_it, value);
 		}
 		else
 		{
+			/* Continue search in the part that is > value */
 			return BinarySearch(middle_it, last, value);
 		}
 		
@@ -656,8 +660,8 @@ namespace Misc {
 	{
 		ExerciseStart t{ "Misc:Exercise 3" };
 		//Implement the binary search above
-		std::vector<int> v{ 1,2,3,4,5,6,7,8,9,10 };
-		for (int i = -10; i < 20; i++)
+		std::vector<int> v{ 1,3,4,6,7,9,10 };
+		for (int i = 0; i < 20; i++)
 		{
 			auto pos = BinarySearch(std::begin(v), std::end(v), i);
 			if (pos == v.end())
