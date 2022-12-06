@@ -607,6 +607,48 @@ namespace Misc {
 	ForwardIterator BinarySearch(ForwardIterator first, const ForwardIterator last, const ValueType& value) {
 		//Implement here
 
+		// I'll go for a recursive implementation
+
+		// Break condition
+		unsigned int current_distance = std::distance(first, last);
+		if (current_distance <= 1)
+		{
+			/* We just have two elements left */
+			if (*first >= value)
+			{
+				return first;
+			}
+			else
+			{
+				return last;
+			}
+		}
+		
+
+		/* Make a copy of the iterator 'first', because we may need it for later */
+		auto middle_it = first;
+
+		/* calculate the middle point of the collection indicated by first and last */
+		unsigned int middle = current_distance / 2;
+
+		/* advance the iterator to this point */
+		std::advance(middle_it, middle);
+
+		/* Check the value at this position */
+		const ValueType& current_element = *middle_it;
+
+		if (current_element >= value)
+		{
+			return BinarySearch(first, middle_it, value);
+		}
+		else
+		{
+			return BinarySearch(middle_it, last, value);
+		}
+		
+
+		
+
 		return first;
 	}
 
@@ -615,13 +657,34 @@ namespace Misc {
 		ExerciseStart t{ "Misc:Exercise 3" };
 		//Implement the binary search above
 		std::vector<int> v{ 1,2,3,4,5,6,7,8,9,10 };
-		auto pos = BinarySearch(std::begin(v), std::end(v), 5);
+		for (int i = -10; i < 20; i++)
+		{
+			auto pos = BinarySearch(std::begin(v), std::end(v), i);
+			if (pos == v.end())
+			{
+				std::cout << "Binary Search returned v.end()" << std::endl;
+			}
+			else
+			{
+				std::cout << *pos << std::endl;
+			}
+			
+		}
+		
 	}
 }
 
 int main()
 {
-	{ //Container stuff
+	{ 
+		// Some testing stuff
+		std::vector<int> vec = { 1 , 2, 3};
+		auto dist = std::distance(vec.begin(), vec.end());
+		std::cout << dist << std::endl;
+		std::cout << "Distance / 2: " << (dist / 2) << std::endl;
+		
+		
+		//Container stuff
 		using namespace ContainerAlgorithm;
 		Exercise1();
 		Exercise2();
