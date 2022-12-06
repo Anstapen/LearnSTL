@@ -20,7 +20,7 @@ concept Printable = requires(std::ostream & os, T & p)
 
 //Our enhanced Regular Type concept
 template<class T>
-concept ExtendedRegularType = std::regular<T> and std::totally_ordered<T>;
+concept ExtendedRegularType = std::regular<T> and std::totally_ordered<T>; //Our extended regular type adds totally_ordered to the requirement
 
 //Product type.
 class Product
@@ -29,19 +29,14 @@ public:
 	Product() noexcept = default;
 	Product(const Product& other) noexcept
 		: _Name{ other._Name }, _Price{ other._Price }, _FreeDelivery{ other._FreeDelivery } {}
-	Product(std::string const name, int const price, bool const freeDelivery) noexcept
+	Product(std::string const name, double const price, bool const freeDelivery) noexcept
 		: _Name{ name }, _Price{ price }, _FreeDelivery{ freeDelivery } {}
 
-	[[nodiscard]] auto operator<=>(const Product& other) const noexcept
-	{
-		return (_Name <=> other._Name);
-	}
+	//These operators are needed for totally_ordering and equality_comparable
+	auto operator<=>(const Product& other) const noexcept = default;
+	bool operator==(Product const& other) const noexcept = default;
 
-	[[nodiscard]] bool operator==(Product const& other) const noexcept
-	{
-		return (_Name == other._Name);
-	}
-
+	//Printing a product
 	void Print(std::ostream& os) const
 	{
 		os << std::format("Name:{}\t Price:{}\t Shipping:{}\n", _Name, _Price, (_FreeDelivery ? "free" : "not free"));
@@ -50,7 +45,7 @@ public:
 	std::string Name() const {
 		return _Name;
 	}
-	int Price() const
+	double Price() const
 	{
 		return _Price;
 	}
@@ -62,12 +57,12 @@ public:
 private:
 	friend std::ostream& operator<<(std::ostream& os, const Product& product);
 	std::string _Name{};
-	int _Price{ 0 };
+	double _Price{ 0 };
 	bool _FreeDelivery{ false };
 };
 
-static_assert(ExtendedRegularType<Product>); //Make sure Product is a Regular Type
-static_assert(Printable<Product>);    //make sure Product is models the Printable concept
+static_assert(ExtendedRegularType<Product>); //Make sure Product is am (extended) Regular Type (about Regular Type see https://abseil.io/blog/20180531-regular-types)
+static_assert(Printable<Product>); //make sure Product is models the Printable concept
 
 //Print function for a product
 std::ostream& operator<<(std::ostream& os, const Product& product)
@@ -462,6 +457,26 @@ namespace ContainerAlgorithm {
 		Print(v);
 		assert(std::ranges::is_sorted(v));
 	}
+
+	void Exercise16()
+	{
+		ExerciseStart t{ "ContainerAlgorithm:Exercise 16" };
+
+		// Check out this programmking challenge: https://www.hackerrank.com/contests/hourrank-31/challenges/hanging-posters/problem
+		// See the solution below and try to find at least one solution that uses STL algorithm(s)
+
+		int h = 6;
+		std::vector<int> wallPoints{ 22,33,19,74 };
+		std::vector<int> lengths{ 2,3,5,6 };
+
+		int accumulator = 0;
+		for (int i = 0; i < wallPoints.size(); ++i)
+			accumulator = std::max(accumulator, wallPoints[i] - lengths[i] / 4);
+		auto result = std::max(0, accumulator - h);
+
+		//Implement your solution here
+
+	}
 }
 
 namespace STLRanges
@@ -532,38 +547,56 @@ namespace Misc {
 
 	void Exercise2()
 	{
-		//See the following struct. It represents a Fraction type that stores the denominator and divider.
+		//See the following class Fraction. It represents a Fraction type that stores the denominator and divider.
 		//Implement the operator overloads so that the comparisons below prints correctly (uncomment to verify your code).
 		//Try to implement as less operator overloads as possible.
 
 		ExerciseStart t{ "Misc:Exercise 2" };
 
-		class Frac {
+		class Fraction {
 		public:
-			Frac(int denominator, int divisor) : Denominator{ denominator }, Divisor{ divisor } {}
+			Fraction() = default;
+			Fraction(const Fraction& other) noexcept = default;
+			Fraction(int denominator, int divisor) : Denominator{ denominator }, Divisor{ divisor } {}
 
-			//Implement comparison operators here
+			//Implement the following comparison operators, so that they return the correct values
+			auto operator<=>(const Fraction& rhs) const noexcept = default;
+			bool operator==(const Fraction& rhs) const noexcept = default;
 
 		private:
-			long Denominator;
-			long Divisor;
+
+			long Denominator{ 0 };
+			long Divisor{ 1 };
 		};
 
-		Frac a{ 10, 15 };
-		Frac b{ 2, 3 };
-		Frac c{ 5, 3 };
+		Fraction a{ 10, 15 };
+		Fraction b{ 2, 3 };
+		Fraction c{ 5, 3 };
 
-		//Un-comment the following block to chek your results
-		/*
-		PrintF("a < c  should be true and is: {}\n", (a < c));
-		PrintF("c > a  should be true and is: {}\n", (c > a));
-		PrintF("a == b should be true and is: {}\n", (a == b));
-		PrintF("a != b should be false and is: {}\n", (a != b));
-		PrintF("a <= b should be true and is: {}\n", (a <= b));
-		PrintF("a <= c should be true and is: {}\n", (a <= c));
-		PrintF("c >= a should be true and is: {}\n", (c >= a));
-		PrintF("a != c should be true and is: {}\n", (a != c));
-		*/
+		Fraction d{ 1, 3 };
+		Fraction e{ 2, 6 };
+
+		Fraction f{ 1, 5 };
+		Fraction g{ 2, 10 };
+
+		//Un-comment the following to check your results
+		return;
+
+		PrintF("a < c  should be true and is: {}\n", (a < c)); assert((a < c));
+		PrintF("a > c  should be false and is: {}\n", (a > c)); assert(!(a > c));
+		PrintF("c < a  should be false and is: {}\n", (c < a)); assert(!(c < a));
+		PrintF("a == b should be true and is: {}\n", (a == b)); assert((a == b));
+		PrintF("a != b should be false and is: {}\n", (a != b)); assert(!(a != b));
+		PrintF("a <= b should be true and is: {}\n", (a <= b)); assert((a <= b));
+		PrintF("a <= c should be true and is: {}\n", (a <= c)); assert((a <= c));
+		PrintF("a >= c should be false and is: {}\n", (a >= c)); assert(!(a >= c));
+		PrintF("c >= a should be true and is: {}\n", (c >= a)); assert((c >= a));
+		PrintF("c <= a should be false and is: {}\n", (c <= a)); assert(!(c <= a));
+		PrintF("a != c should be true and is: {}\n", (a != c)); assert((a != c));
+		PrintF("d == e should be true and is: {}\n", (d == e)); assert((d == e));
+		PrintF("f == g should be true and is: {}\n", (f == g)); assert((f == g));
+
+		assert(ExtendedRegularType<Fraction>);  //Uncomment to check if the Fraction is an extended Regular Type
 	}
 
 	//See the template function signature below. Write a binary search in the body of that function which returns an iterator
@@ -572,12 +605,15 @@ namespace Misc {
 
 	template <std::forward_iterator ForwardIterator, typename ValueType>
 	ForwardIterator BinarySearch(ForwardIterator first, const ForwardIterator last, const ValueType& value) {
+		//Implement here
+
 		return first;
 	}
 
 	void Exercise3()
 	{
-		//Implementg the binary search above
+		ExerciseStart t{ "Misc:Exercise 3" };
+		//Implement the binary search above
 		std::vector<int> v{ 1,2,3,4,5,6,7,8,9,10 };
 		auto pos = BinarySearch(std::begin(v), std::end(v), 5);
 	}
@@ -602,12 +638,14 @@ int main()
 		Exercise13();
 		Exercise14();
 		Exercise15();
+		Exercise16();
 	}
 
 	{  //Misc stuff
 		using namespace Misc;
 		Exercise1();
 		Exercise2();
+		Exercise3();
 	}
 
 	{
